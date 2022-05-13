@@ -3,12 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Models\Project;
+use App\Models\Tasks;
 use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Monolog\Handler\PushoverHandler;
 
 class ProjectController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -16,8 +25,28 @@ class ProjectController extends Controller
      */
     public function index()
     {
-        $project = Project::all();
-        return view("project.index", ['projects' => $project]);
+        $user = Auth::user();
+
+        // $project = Project::where('description', 'LIKE' , '%'.$search_key.'%')
+        // ->get();
+
+        // $pending = Project::withCount([
+        //     'tasks', 
+        //     'tasks as pending_tasks' => function ($query) {
+        //         $query->where('status_id', 'NOT', 3);
+        //     }])
+        //     ->get();
+
+        //     dd($pending);
+
+        $projects = [];
+        foreach($user->projects as $project) {
+            array_push($projects, $project);
+        }
+
+        
+
+        return view("project.index", ['projects' => $projects]);
     }
 
     /**
@@ -38,13 +67,20 @@ class ProjectController extends Controller
      */
     public function store(Request $request)
     {
+        
         //Kuriamas naujas objektas iš Request reikšmių, siuntimui į db
+        $user = Auth::user();
+        // $users=[$user];
+        // $project=Project::create($request->all);
         $project = new Project;
         $project->title = $request->project_title;
         $project->description = $request->project_description;
         $project->status_id = 1;
-
         $project->save();
+        $project->users()->attach($user);
+       
+
+
 
         //Kuriamas naujas asociatyvinis masyvas su $article objekto reikšmėmis + success žinutė
         $project_array = array(

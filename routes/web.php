@@ -14,13 +14,11 @@ use Illuminate\Support\Facades\Auth;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
 
 Auth::routes();
+Route::get('/home', 'App\Http\Controllers\HomeController@index')->name('home');
+Route::get('/', 'App\Http\Controllers\HomeController@index')->name('home');
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
 Route::prefix('projects')->group(function () {
 
@@ -28,7 +26,6 @@ Route::prefix('projects')->group(function () {
     Route::post('store', 'App\Http\Controllers\ProjectController@store')->name('project.store');
     Route::get('show/{project}', 'App\Http\Controllers\ProjectController@show')->name('project.show');
     Route::get('showAjax/{project}', 'App\Http\Controllers\ProjectController@showAjax')->name('project.showAjax');
-    Route::post('update/{project}', 'App\Http\Controllers\ProjectController@update')->name('project.update');    
-    Route::post('destroy/{project}', 'App\Http\Controllers\ProjectController@destroy')->name('project.destroy');   
-    
+    Route::post('update/{project}', 'App\Http\Controllers\ProjectController@update')->name('project.update');
+    Route::post('destroy/{project}', 'App\Http\Controllers\ProjectController@destroy')->name('project.destroy');
 });

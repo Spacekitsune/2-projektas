@@ -175,11 +175,15 @@
             return $(".template tbody").html();
         }
 
+        
+
         //AJAX STORE DALIS:
         $("#submit-ajax-form-project").click(function() {
             //sukurti naujus kintamuosius
             let project_title;
             let project_description;
+            let project_user=[];            
+
             //užpildyti kintamuosius reikšmėmis iš nurodytų id input'ų
             project_title = $('#project_title').val();
             project_description = $('#project_description').val();

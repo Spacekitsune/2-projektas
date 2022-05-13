@@ -15,10 +15,13 @@
                         <label for="project_description">Project description</label>
                         <textarea class="form-control" name="project_description" id="project_description" cols="30" rows="5"></textarea>
                     </div>
-
-                    <button class="btn btn-primary my-2">
+                    <div class="form-group" id="form-group-user">
+                        <label for="project_user">Add user to project:</label>
+                        <input class="form-control" name="project_user"  type="text"/>
+                    </div>
+                    <button id="project-add-users" class="btn btn-primary my-2">
                         <i class="fa fa-plus" aria-hidden="true"></i>
-                        Add project participants
+                        Add more
                     </button>
 
                 </div>
@@ -64,8 +67,7 @@
             <div class="modal-body">
                 <div class="ajaxForm">
                     <div class="form-group">
-                        <label for="project_id">Project id</label>
-                        <input id="edit_project_id" class="form-control" type="text" name="project_id" />
+                        <input id="edit_project_id" class="form-control" type="text" name="project_id" hidden/>
                     </div>
                     <div class="form-group">
                         <label for="project_title">Project title</label>
@@ -73,7 +75,7 @@
                     </div>
                     <div class="form-group">
                         <label for="project_description">Project Description</label>
-                        <input id="edit_project_description" class="form-control" type="text" name="project_description" />
+                        <textarea id="edit_project_description" class="form-control" name="project_description" cols="30" rows="5"></textarea>
                     </div>
                 </div>
             </div>
