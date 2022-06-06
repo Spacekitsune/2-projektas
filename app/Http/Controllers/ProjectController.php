@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Project;
-use App\Models\Tasks;
+use App\Models\User;
+use App\Models\Task;
 use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
 use Illuminate\Http\Request;
@@ -27,27 +28,35 @@ class ProjectController extends Controller
     {
         $user = Auth::user();
 
-        // $project = Project::where('description', 'LIKE' , '%'.$search_key.'%')
-        // ->get();
+        $projects = $user->projects;
 
-        // $pending = Project::withCount([
-        //     'tasks', 
-        //     'tasks as pending_tasks' => function ($query) {
-        //         $query->where('status_id', 'NOT', 3);
-        //     }])
-        //     ->get();
+        $pending_projects = 0;
+        $completed_projects = 0;
 
-        //     dd($pending);
 
-        $projects = [];
-        foreach($user->projects as $project) {
-            array_push($projects, $project);
+        foreach ($projects as $project) {
+            $pending_tasks = 0;
+            if ($project->status_id != 3) {
+                $pending_projects++;
+            } else {
+                $completed_projects++;
+            }
+            if (count($project->projectTasks) == 0) {
+                $project->pending_tasks = 0;
+            }
+            foreach ($project->projectTasks as $task) {
+                if ($task->status_id != 3) {
+                    $pending_tasks++;
+                }
+                $project->pending_tasks = $pending_tasks;
+            }
         }
 
-        
-
-        return view("project.index", ['projects' => $projects]);
+        return view("project.index", ['projects' => $projects, 'pending_projects' => $pending_projects, 'completed_projects' => $completed_projects]);
     }
+
+    //     return view("project.index", ['projects' => $projects]);
+    // }
 
     /**
      * Show the form for creating a new resource.
@@ -67,7 +76,7 @@ class ProjectController extends Controller
      */
     public function store(Request $request)
     {
-        
+
         //Kuriamas naujas objektas iš Request reikšmių, siuntimui į db
         $user = Auth::user();
         // $users=[$user];
@@ -78,7 +87,19 @@ class ProjectController extends Controller
         $project->status_id = 1;
         $project->save();
         $project->users()->attach($user);
-       
+        // $project->users()->attach($request->project_user);
+        if (count($request->project_user) != 0) {
+            $users = User::all();
+            foreach ($request->project_user as $project_user) {
+                foreach ($users as $user) {
+                    if ($user->email == $project_user) {
+                        $project->users()->attach($user->id);
+                    }
+                }
+            }
+        }
+
+
 
 
 
@@ -115,12 +136,19 @@ class ProjectController extends Controller
     public function showAjax(Project $project)
     {
 
+
+        $project_users = [];
+        foreach ($project->users as $user) {
+            array_push($project_users, $user->name);
+        }
+
         $project_array = array(
             'successMessage' => "Project retrieved succesfuly",
             'projectId' => $project->id,
             'projectTitle' => $project->title,
             'projectDescription' => $project->description,
             'projectTasks' => count($project->projectTasks),
+            'projectUsers' => $project_users
         );
 
         $json_response = response()->json($project_array);
@@ -147,10 +175,21 @@ class ProjectController extends Controller
      */
     public function update(Request $request, Project $project)
     {
+
         $project->title = $request->project_title;
         $project->description = $request->project_description;
-
         $project->save();
+
+        if (count($request->project_user) != 0) {
+            $users = User::all();
+            foreach ($request->project_user as $project_user) {
+                foreach ($users as $user) {
+                    if ($user->email == $project_user) {
+                        $project->users()->attach($user->id);
+                    }
+                }
+            }
+        }
 
         $project_array = array(
             'successMessage' => "Project updated succesfuly",
@@ -178,19 +217,22 @@ class ProjectController extends Controller
         if (count($tasks) != 0) {
 
             $error_array = array(
-                'answer'=>false,
-                'destroyMessage' => $project->title . " project can't be deleted. There are tasks."
+                'answer' => false,
+                'destroyMessage' => $project->title . " project can't be deleted. Project has assigned tasks."
             );
 
             $json_response = response()->json($error_array);
             return $json_response;
-
         } else {
 
             $project->delete();
+            $project->users()->detach($project->id);
+            // Report::destroy($report_id);
+
+            // ReportMessages::where('report_id', $report_id)->delete();
 
             $success_array = array(
-                'answer'=>true,
+                'answer' => true,
                 'destroyMessage' => $project->title . " project deleted successfuly"
             );
 
@@ -198,5 +240,35 @@ class ProjectController extends Controller
 
             return $json_response;
         }
+    }
+
+    public function destroyWithTasks(Project $project)
+    {
+        $tasks=Task::all();
+        foreach($tasks as $task) {
+            if ($project->id==$task->project_id) {
+                $task->delete();
+            }
+        }
+        $project->delete();
+        $project->users()->detach($project->id);
+    }
+
+
+    public function search(Request $request)
+    {
+
+        $search_key = $request->search_key;
+
+        $user = Auth::user();
+
+
+
+        $projects = $user->projects::where('title', 'LIKE', '%' . $search_key . '%')
+            ->orWhere('description', 'LIKE', '%' . $search_key . '%')
+            ->get();
+
+
+        return view('project.search', ['projects' => $projects]);
     }
 }

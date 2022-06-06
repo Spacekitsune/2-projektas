@@ -20,7 +20,7 @@
                 <div class="card px-2">
                     <div class="card-body">
                         <div class="container-fluid px-0 my-2" style="display: flex; justify-content: space-between; align-items: center">
-                            <h3 class="m-0 p-0">0</h3>
+                            <h3 class="m-0 p-0">{{count($projects)}}</h3>
                             <i class="fa fa-archive fs-4" aria-hidden="true"></i>
                         </div>
                         <h5 class="card-title">Total projects</h5>
@@ -34,7 +34,7 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="container-fluid px-0 my-2" style="display: flex; justify-content: space-between; align-items: center">
-                            <h3 class="m-0 p-0">0</h3>
+                            <h3 class="m-0 p-0">{{$completed_projects}}</h3>
                             <i class="fa fa-check fs-4" aria-hidden="true"></i>
                         </div>
                         <h5 class="card-title">Completed projects</h5>
@@ -48,7 +48,7 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="container-fluid px-0 my-2" style="display: flex; justify-content: space-between; align-items: center">
-                            <h3 class="m-0 p-0">0</h3>
+                            <h3 class="m-0 p-0">{{$pending_projects}}</h3>
                             <i class="fa fa-file-text fs-4" aria-hidden="true"></i>
                         </div>
                         <h5 class="card-title">Pending projects</h5>
@@ -109,8 +109,8 @@
             </td>
             <td class="col-project-description" style="width: 40%">{{$project->description}}</td>
             <td class="col-project-statusProject">{{$project->statusProject->title}}</td>
-            <td class="col-project-projectTasks">{{count($project->projectTasks)}}</td>
-            <td></td>
+            <td class="col-project-projectTasks count-tasks">{{count($project->projectTasks)}}</td>
+            <td>{{$project->pending_tasks}}</td>
             <td>
                 <button type="button" class="btn btn-primary show-project" data-bs-toggle="modal" data-bs-target="#showProjectModal" data-projectid="{{$project->id}}" title="Quick view project">
                     <i class="fa fa-eye" aria-hidden="true"></i>
@@ -147,12 +147,11 @@
             </td>
         </tr>
     </table>
-
-
 </div>
 
+
+
 <script>
-    // Užklausos nustatymai (headeriai) ajax priėjimui prie serverio (analogas @csrf)
     $.ajaxSetup({
         headers: {
             "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
@@ -175,36 +174,65 @@
             return $(".template tbody").html();
         }
 
-        
+
+        let wrapper = $(".inputs-field-wrap");
+        let add_button = $("#project-add-users");
+        let append_text = `<div class="input-group mb-3 clear-inpput">
+                            <input type="text" class="project_user form-control" placeholder="Enter user email here..." aria-label="Add user" aria-describedby="button-addon2">
+                            <button class="btn btn-outline-danger remove_project-user" type="button" title="Remove">
+                                <i class="fa fa-times d-inline-block" aria-hidden="true"></i>
+                            </button>
+                        </div>`;
+
+        let max_fields = 10;
+        let x = 0;
+
+        $(add_button).click(function(e) {
+            e.preventDefault();
+            if (x < max_fields) {
+                x++;
+                wrapper.append(append_text);
+            } else {
+                alert('Maximum project users limit was reached');
+            }
+        })
+
+        $(wrapper).on("click", ".remove_project-user", function(e) {
+            e.preventDefault();
+            $(this).parent('div').remove();
+            x--;
+
+        })
+
+        $('.modal-footer').on("click", ".empty-value", function(e) {
+            e.preventDefault();
+            $(wrapper).innerHTML = '';
+        })
 
         //AJAX STORE DALIS:
         $("#submit-ajax-form-project").click(function() {
-            //sukurti naujus kintamuosius
             let project_title;
             let project_description;
-            let project_user=[];            
 
-            //užpildyti kintamuosius reikšmėmis iš nurodytų id input'ų
             project_title = $('#project_title').val();
             project_description = $('#project_description').val();
-            //užklausa į serverį
+
+            var project_user = new Array();
+            $('.project_user').each(function() {
+                project_user.push($(this).val());
+            });
+
             $.ajax({
-                type: 'POST', // nurodyti siuntimo metodą (POST, GET)
-                url: '{{route("project.store")}}', // nurodyti action nuorodą
-                //sukuriamas objektas su naujais kintamaisias
-                //ar išsisiuntė sėkmingai, inspect>network>storeAjax>Headers (200 OK reiškia, kad išsisiuntė)
+                type: 'POST',
+                url: '{{route("project.store")}}',
                 data: {
                     project_title: project_title,
-                    project_description: project_description
+                    project_description: project_description,
+                    project_user: project_user
                 },
-                // success atributas patikrina ar užklausa nuėjo į serverį t.y. ieško 200 OK
-                // data kintamasis yra atsakymas t.y. ką gražina storeAjax metodas
-                // inspect>network>storeAjax>Response
                 success: function(data) {
-                    // sėkmės atveju sukuriamas kintamasis html, kuris yra f-cijos grą-inama reikšmė
                     let html;
                     html = createRowFromHtml(data.projectId, data.projectTitle, data.projectDescription, data.projectStatus, data.projectTasks, data.projectPending);
-                    // html kintamasis prisegamas prie pagrindinės lentelės
                     $("#projects-table").append(html);
                     $("#createProjectModal").hide();
                     $('body').removeClass('modal-open');
@@ -212,12 +240,11 @@
                     $('body').css({
                         overflow: 'auto'
                     });
-                    // #alert div padaromas matomu
                     $("#alert").removeClass("d-none");
                     $("#alert").html(data.projectTitle + " " + data.successMessage);
-                    //ištuštinami inputų laukeliai 
                     $('#project_title').val('');
                     $('#project_description').val('');
+                    $('.clear-inpput').empty();
                 }
             });
         });
@@ -235,32 +262,65 @@
                     $('.show-project-id').html("Project id: " + data.projectId);
                     $('.show-project-description').html("Project description: " + data.projectDescription);
                     $('.show-project-tasks').html("Total tasks: " + data.projectTasks);
+                    $('.show-project-users').html("<h6>Project participants:</h6>")
+                    for (i = 0; i < data.projectUsers.length; i++) {
+                        $('.show-project-users').append("<li>" + data.projectUsers[i] + "</li>");
+                    }
                     $('#open-ajax-form-project').attr("href", "/projects/show/" + projectid);
 
                 }
             });
         });
 
-        // EDIT UPDATE AJAX dalis 
-        // edit atidaro modalą su su duomenimis (edit mygtukas)
-        // updateAjax išsaugo db ir grąžina atnaujintus duomenis (update mygtukas modale)
+        // EDIT UPDATE AJAX dalis         
         $(document).on('click', '.edit-project', function() {
+
             let projectid;
             projectid = $(this).attr('data-projectid');
             $.ajax({
                 type: 'GET',
-                //galima naudotis showAjax metodu, nes jis gražina duomenis apie pasirinktą id
                 url: '/projects/showAjax/' + projectid,
                 success: function(data) {
                     $('#edit_project_id').val(data.projectId);
                     $('#edit_project_title').val(data.projectTitle);
                     $('#edit_project_description').val(data.projectDescription);
+                    $.each(data.projectUsers, function(index, value) {
+                        $('.edit-inputs-field-wrap').prepend('<div class="input-group mb-3 clear-inpput"><input type="text" class="project_user form-control" value="' + value + '" aria-label="Add user" aria-describedby="button-addon2"><button class="btn btn-outline-danger remove_project-user" type="button" title="Remove"><i class="fa fa-times d-inline-block" aria-hidden="true"></i></button></div>');
+                    });
+                    $('.edit-inputs-field-wrap').prepend('<label for="project_description">Project participants</label>');
+
+                    let max_fields = 10;
+                    let x = data.projectUsers.length;
+
+                    $('#edit-project-add-users').click(function(e) {
+                        e.preventDefault();
+                        if (x < max_fields) {
+                            x++;
+                            $('.edit-inputs-field-wrap').append(append_text);
+                        } else {
+                            alert('Maximum project users limit was reached');
+                        }
+                    })
+
+                    $('.edit-inputs-field-wrap').on("click", ".remove_project-user", function(e) {
+                        e.preventDefault();
+                        $(this).parent('div').remove();
+                        x--;
+
+                    })
                 }
             });
         });
 
 
         $(document).on('click', '#update-project', function() {
+            var project_user = new Array();
+            $('.project_user').each(function() {
+                project_user.push($(this).val());
+            });
+
+            project_user = project_user.filter(distinct);
+
             let projectid;
             let project_title;
             let project_description;
@@ -272,9 +332,9 @@
                 url: '/projects/update/' + projectid,
                 data: {
                     project_title: project_title,
-                    project_description: project_description
+                    project_description: project_description,
+                    project_user: project_user
                 },
-                // sėkmės atveju pasirenkami atitinkamos article id klasės eilutės elementai ir jų reikšmė keičiama į naują
                 success: function(data) {
                     $(".project" + projectid + " " + ".col-project-title").html(data.projectTitle)
                     $(".project" + projectid + " " + ".col-project-description").html(data.projectDescription)
@@ -291,32 +351,38 @@
         })
 
         $(document).on('click', '.delete-project', function() {
-            // naujas kintamasis, kuris bus id
+
             let projectid;
-            //this mato kuris mygtukas buvo paspaustas ir pasiima jo id
+
             projectid = $(this).attr('data-projectid');
-            //užklausa serveriui
+
+
             $.ajax({
                 type: 'POST',
-                url: '/projects/destroy/' + projectid, // action kelias + id kintamasis
+                url: '/projects/destroy/' + projectid,
                 success: function(data) {
-                    // data yra return'as iš deleteAjax metodo
                     let answer = data.answer
                     if (answer) {
-
-                        // #alert div padaromas matomu
-                        
-                        $("#alert").addClass("alert-success");
-                        // į #alert įdedama žinutė iš data atsakymo objekto 
-                        
-
-                        // ištrinama lentelės eilutė <tr> su klase article+id
+                        // $("#alert").addClass("alert-success");
                         $('.project' + projectid).remove();
-                    } else {          
-                        $("#alert").addClass("alert-danger");
+                        alert(data.destroyMessage);
+                    } else {
+                        // $("#alert").addClass("alert-danger");
+                        var dialog = confirm(data.destroyMessage);
+                        if (dialog) {
+                            $.ajax({
+                                type: 'POST',
+                                url: '/projects/destroyWithTasks/' + projectid,
+                                success: function(data) {
+                                    $('.project' + projectid).remove();
+                                }
+                            })
+                        } else {
+
+                        }
                     }
-                    $("#alert").removeClass("d-none");
-                    $("#alert").html(data.destroyMessage);
+                    // $("#alert").removeClass("d-none");
+                    // $("#alert").html(data.destroyMessage);
                 }
             });
         });

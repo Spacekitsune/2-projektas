@@ -36,7 +36,7 @@ class TaskController extends Controller
      */
     public function store(StoreTaskRequest $request)
     {
-        //
+        
     }
 
     /**
@@ -81,6 +81,15 @@ class TaskController extends Controller
      */
     public function destroy(Task $task)
     {
-        //
-    }
+        
+            $task->delete();
+            $success_array = array(
+                'destroyMessage' => $task->title . " project deleted successfuly"
+            );
+
+            $json_response = response()->json($success_array);
+
+            return $json_response;
+        }
+    
 }
