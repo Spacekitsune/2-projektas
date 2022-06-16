@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Task;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
+use Illuminate\Http\Request;
+use App\Models\User;
 
 class TaskController extends Controller
 {
@@ -34,9 +36,44 @@ class TaskController extends Controller
      * @param  \App\Http\Requests\StoreTaskRequest  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(StoreTaskRequest $request)
+    public function store(Request $request)
     {
+        $users = User::all();
+               
+        $task = new Task;
+
+        $task->title = $request->task_title;
+        $task->description = $request->task_description;
+        $task->project_id = $request->project_id;
+
+
+        foreach ($users as $user){
+        if ($user->email == $request->task_user) {
+            $task->user_id = $user->id;
+            $task_user_name=$user->name;
+        }
+    }
         
+        $task->status_id = $request->task_status;
+        $task->priority_id = $request->task_priority;
+        $task->save();
+
+        $project_array = array(
+            'successMessage' => "Task was stored succesfuly",
+            'taskId' => $task->id,
+            'taskTitle' => $task->title,
+            'taskDescription' => $task->description,
+            'taskProjectId' => $task->project_id,
+            'taskUser' => $task_user_name,
+            'taskStatus' => $task->status_id,
+            'taskPriority' => $task->priority_id,
+            'taskCreated' => date_format($task->created_at,"Y-m-d H:i:s"),            
+            'taskUpdated' => date_format($task->updated_at,"Y-m-d H:i:s"),
+        );
+        
+        $json_response = response()->json($project_array);
+
+        return $json_response;
     }
 
     /**
@@ -81,7 +118,6 @@ class TaskController extends Controller
      */
     public function destroy(Task $task)
     {
-        
             $task->delete();
             $success_array = array(
                 'destroyMessage' => $task->title . " project deleted successfuly"

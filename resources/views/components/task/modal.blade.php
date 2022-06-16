@@ -7,6 +7,9 @@
             </div>
             <div class="modal-body">
                 <div class="ajaxForm">
+                <div class="form-group">
+                        <input id="project_id" type="hidden" name="project_id"/>
+                    </div>
                     <div class="form-group">
                         <label for="task_title">Task title</label>
                         <input id="task_title" class="form-control" type="text" name="task_title" placeholder="Enter your task title here..." />
@@ -28,8 +31,8 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="task_progress">Task progress</label>
-                        <select class="form-control" name="task_progress" id="task_progress">
+                        <label for="task_status">Task progress</label>
+                        <select class="form-control" name="task_status" id="task_status">
                         <option value="1">To do</option>
                             <option value="2">In progress</option>
                             <option value="3">Done</option>

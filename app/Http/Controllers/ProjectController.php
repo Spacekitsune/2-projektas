@@ -10,6 +10,8 @@ use App\Http\Requests\UpdateProjectRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Monolog\Handler\PushoverHandler;
+use App\Exports\ProjectExport;
+use Excel;
 
 class ProjectController extends Controller
 {
@@ -99,10 +101,6 @@ class ProjectController extends Controller
             }
         }
 
-
-
-
-
         //Kuriamas naujas asociatyvinis masyvas su $article objekto reikšmėmis + success žinutė
         $project_array = array(
             'successMessage' => "Project was stored succesfuly",
@@ -139,7 +137,8 @@ class ProjectController extends Controller
 
         $project_users = [];
         foreach ($project->users as $user) {
-            array_push($project_users, $user->name);
+            // array_push($project_users, $user->name);
+            $project_users += array($user->email => $user->name);
         }
 
         $project_array = array(
@@ -218,7 +217,7 @@ class ProjectController extends Controller
 
             $error_array = array(
                 'answer' => false,
-                'destroyMessage' => $project->title . " project can't be deleted. Project has assigned tasks."
+                'destroyMessage' => $project->title . " project can't be deleted. Project has assigned tasks. Delete anyway?"
             );
 
             $json_response = response()->json($error_array);
@@ -271,4 +270,6 @@ class ProjectController extends Controller
 
         return view('project.search', ['projects' => $projects]);
     }
+
+    
 }

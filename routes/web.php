@@ -31,6 +31,6 @@ Route::prefix('projects')->group(function () {
     Route::post('destroyWithTasks/{project}', 'App\Http\Controllers\ProjectController@destroyWithTasks')->name('project.destroyWithTasks');
    
     Route::post('storeTask', 'App\Http\Controllers\TaskController@store')->name('project.storeTask');
-    Route::post('destroyTask/{task}', 'App\Http\Controllers\TaskController@destroy')->name('project.destroyTask');
+    Route::post('destroyTask/{task}', 'App\Http\Controllers\TaskController@destroy')->name('task.destroyTask');
 });
 

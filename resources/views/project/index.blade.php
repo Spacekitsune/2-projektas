@@ -141,7 +141,7 @@
                 <button type="button" class="btn btn-success edit-project" data-bs-toggle="modal" data-bs-target="#editProjectModal" data-projectid="" title="Edit project">
                     <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
                 </button>
-                <button type="submit" class="btn btn-danger delete-project" data-projectid="{{$project->id}}" title="Delete project">
+                <button type="submit" class="btn btn-danger delete-project" data-projectid="" title="Delete project">
                     <i class="fa fa-trash" aria-hidden="true"></i>
                 </button>
             </td>

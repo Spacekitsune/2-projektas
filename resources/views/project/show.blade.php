@@ -10,18 +10,104 @@
         </a>
     </div>
 
-    <div class="container">
-        <h1>{{ $project->title }}</h1>
-        <button id="add-new-task" data-projectid="{{$project->id}}" type="button" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#createTaskModal">
-            <i class="fa fa-plus" aria-hidden="true"></i>
-            Add new task
-        </button>
+
+    <h1>{{ $project->title }}</h1>
+    <button id="add-new-task" data-projectid="{{$project->id}}" type="button" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#createTaskModal">
+        <i class="fa fa-plus" aria-hidden="true"></i>
+        Add new task
+    </button>
+
+
+    <div class="row my-2" style="min-height: 100px;">
+
+
+
+        <div class="col-sm-4">
+            <h2>To do</h2>
+            <div class="card p-1 draggable-container" style="min-height: 100px">
+                @foreach ($project-> projectTasks as $task)
+                @if ($task->status_id==1)
+                <div class="draggable card-body border border-danger m-2 rounded-lg task{{$task->id}}" draggable="true">
+                    <h5>{{$task->title}}</h5>
+                    <div class="d-inline-flex ">
+                        <button class="btn btn-dark font-weight-bolder rounded-circle px-3" title="{{$task->taskUser->name}}">{{substr($task->taskUser->name,0,1)}}</button>
+                    </div>
+                    <div class="d-inline-flex justify-content-end">
+                        <button type="button" class="btn text-primary border-primary btn-sm show-task" data-bs-toggle="modal" data-bs-target="#showTaskModal" data-taskid="{{$task->id}}" title="Quick view task">
+                            <i class="fa fa-eye" aria-hidden="true"></i>
+                        </button>
+                        <button type="button" class="btn text-success border-success btn-sm edit-task" data-bs-toggle="modal" data-bs-target="#editTaskModal" data-taskid="{{$task->id}}" title="Edit task">
+                            <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+                        </button>
+                        <button type="submit" class="btn text-danger border-danger btn-sm delete-task" data-taskid="{{$task->id}}" title="Delete task">
+                            <i class="fa fa-trash" aria-hidden="true"></i>
+                        </button>
+                    </div> 
+                </div>
+                @endif
+                @endforeach
+            </div>
+        </div>
+
+
+        <div class="col-sm-4">
+            <h2>In proggress</h2>
+            <div class="card p-1 draggable-container" style="min-height: 50px">
+                @foreach ($project-> projectTasks as $task)
+                @if ($task->status_id==2)
+                <div class="draggable card-body border border-danger m-2 rounded-lg task{{$task->id}}" draggable="true" >
+                    <h5>{{$task->title}}</h5>
+                    <div class="d-inline-flex ">
+                        <button class="btn btn-dark font-weight-bolder rounded-circle px-3" title="{{$task->taskUser->name}}">{{substr($task->taskUser->name,0,1)}}</button>
+                    </div>
+                    <div class="d-inline-flex justify-content-end">
+                        <button type="button" class="btn text-primary border-primary btn-sm show-task" data-bs-toggle="modal" data-bs-target="#showTaskModal" data-taskid="{{$task->id}}" title="Quick view task">
+                            <i class="fa fa-eye" aria-hidden="true"></i>
+                        </button>
+                        <button type="button" class="btn text-success border-success btn-sm edit-task" data-bs-toggle="modal" data-bs-target="#editTaskModal" data-taskid="{{$task->id}}" title="Edit task">
+                            <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+                        </button>
+                        <button type="submit" class="btn text-danger border-danger btn-sm delete-task" data-taskid="{{$task->id}}" title="Delete task">
+                            <i class="fa fa-trash" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+                @endif
+                @endforeach
+            </div>
+        </div>
+
+        <div class="col-sm-4">
+            <h2>Done</h2>
+            <div class="card p-1 draggable-container" style="min-height: 100px">
+                @foreach ($project-> projectTasks as $task)
+                @if ($task->status_id==3)
+                <div class="draggable card-body border border-danger m-2 rounded-lg task{{$task->id}}" draggable="true">
+                    <h5>{{$task->title}}</h5>
+                    <div class="d-inline-flex ">
+                        <button class="btn btn-dark font-weight-bolder rounded-circle px-3" title="{{$task->taskUser->name}}">{{substr($task->taskUser->name,0,1)}}</button>
+                    </div>
+                    <div class="d-inline-flex justify-content-end">
+                        <button type="button" class="btn text-primary border-primary btn-sm show-task" data-bs-toggle="modal" data-bs-target="#showTaskModal" data-taskid="{{$task->id}}" title="Quick view task">
+                            <i class="fa fa-eye" aria-hidden="true"></i>
+                        </button>
+                        <button type="button" class="btn text-success border-success btn-sm edit-task" data-bs-toggle="modal" data-bs-target="#editTaskModal" data-taskid="{{$task->id}}" title="Edit task">
+                            <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+                        </button>
+                        <button type="submit" class="btn text-danger border-danger btn-sm delete-task" data-taskid="{{$task->id}}" title="Delete task">
+                            <i class="fa fa-trash" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+                @endif
+                @endforeach
+            </div>
+        </div>
     </div>
 
-    <div id="alert" class="alert d-none mt-2">
-    </div>
 
-    <div class="container">
+
+    <!-- <div class="container">
         @if (count($project->projectTasks)==0)
         <p>The are no tasks in this project</p>
         @else
@@ -63,35 +149,108 @@
             </tr>
             @endforeach
         </table>
+        <table class="template d-none">
+        <tr>
+        <td class="col-task-user"></td>
+            <td class="col-task-id"></td>
+            <td class="col-task-title"></td>
+            <td class="col-task-description"></td>
+            <td class="col-task-priority"></td>
+            <td class="col-task-status"></td>
+            <td class="col-task-created"></td>
+            <td class="col-task-updated"></td>
+            <td>
+                <button type="button" class="btn btn-primary show-task" data-bs-toggle="modal" data-bs-target="#showTaskModal" data-tasktid="" title="Quick view task">
+                    <i class="fa fa-eye" aria-hidden="true"></i>
+                </button>
+                <button type="button" class="btn btn-success edit-task" data-bs-toggle="modal" data-bs-target="#editTaskModal" data-tasktid="" title="Edit task">
+                    <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+                </button>
+                <button type="submit" class="btn btn-danger delete-task" data-tasktid="" title="Delete task">
+                    <i class="fa fa-trash" aria-hidden="true"></i>
+                </button>
+            </td>
+        </tr>
+    </table>
         @endif
-    </div>
+    </div> -->
 
 
 
 </div>
 
-<script>
+<!-- <script>
+    const draggables = document.querySelectorAll('.draggable');
+    const containers = document.querySelectorAll('.draggable-container');
+
+    draggables.forEach(draggable => {
+        draggable.addEventListener('dragstart', () => {
+            console.log('hello');
+            draggable.classList.add('dragging');
+        })
+
+        draggable.addEventListener('dragend', () => {
+            draggable.classList.remove('dragging');
+        })
+    })
+
+    containers.forEach(container => {
+        container.addEventListener('dragover', e => {
+            e.preventDefault();
+            const afterElement = getDragAfterElement(container, e.clientY);
+            const draggable = document.querySelector('.dragging');
+            if (afterElement == null) {
+                container.appendChild(draggable);
+            } else {
+                container.insertBefore(draggable, afterElement);
+            }
+        })
+    })
+
+    function getDragAfterElement(container, y) {
+        const draggableElements = [...container.querySelectorAll('.draggable:not(.dragging)')];
+
+        return draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = y - box.top - box.height / 2;
+            if (offset < 0 && offset > closest.offset) {
+                return {
+                    offset: offset,
+                    element: child
+                }
+            } else {
+                return closest
+            }
+        }, {
+            offset: Number.NEGATIVE_INFINITY
+        }).element
+    }
+
     $.ajaxSetup({
         headers: {
             "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
         }
     });
+</script> -->
 
+<script>
     $(document).ready(function() {
 
 
 
-        function createRowFromHtml(projectId, projectTitle, projectDescription, projectStatus, projectTasks, projectPending) {
-            $(".template tr").addClass("project" + projectId);
-            $(".template .show-project").attr('data-projectid', projectId);
-            $(".template .edit-project").attr('data-projectid', projectId);
-            $(".template .delete-project").attr('data-projectid', projectId);
-            $(".template .col-project-id").html(projectId);
-            $(".template .col-project-title").html(projectTitle);
-            $(".template .col-project-description").html(projectDescription);
-            $(".template .col-project-status").html(projectStatus);
-            $(".template .col-project-tasks").html(projectTasks);
-            $(".template .col-project-pending").html(projectPending);
+        function createRowFromHtml(taskUser, taskId, taskTitle, taskDescription, taskPriority, taskStatus, taskCreated, taskUpdated) {
+            $(".template tr").addClass("task" + taskId);
+            $(".template .show-task").attr('data-taskid', taskId);
+            $(".template .edit-task").attr('data-taskid', taskId);
+            $(".template .delete-task").attr('data-taskid', taskId);
+            $(".template .col-task-user").html(taskUser);
+            $(".template .col-task-id").html(taskId);
+            $(".template .col-task-title").html(taskTitle);
+            $(".template .col-task-description").html(taskDescription);
+            $(".template .col-task-priority").html(taskPriority);
+            $(".template .col-task-status").html(taskStatus);
+            $(".template .col-task-created").html(taskCreated);
+            $(".template .col-task-updated").html(taskUpdated);
             return $(".template tbody").html();
         }
 
@@ -104,43 +263,58 @@
                 type: 'GET',
                 url: '/projects/showAjax/' + projectid,
                 success: function(data) {
-                    for (i = 0; i < data.projectUsers.length; i++) {
-                        $('#task_user').append("<option>" + data.projectUsers[i] + "</option>");
-                    }
+                    $('#project_id').val(data.projectId)
+                    $('#task_user').empty();
+                    $.each(data.projectUsers, function(index, value) {
+                        $('#task_user').append('<option value="' + index + '">' + value + '</option>');
+                    });
                 }
             });
         });
 
 
         $("#submit-ajax-form-task").click(function() {
+            let project_id;
             let task_title;
             let task_description;
+            let task_user;
+            let task_priority;
+            let task_status;
 
+            project_id = $('#project_id').val();
             task_title = $('#task_title').val();
             task_description = $('#task_description').val();
+            task_user = $('#task_user').val();
+            task_priority = $('#task_priority').val();
+            task_status = $('#task_status').val();
 
             $.ajax({
                 type: 'POST',
                 url: '{{route("project.storeTask")}}',
                 data: {
-                    project_title: project_title,
-                    project_description: project_description
+                    project_id: project_id,
+                    task_title: task_title,
+                    task_description: task_description,
+                    task_user: task_user,
+                    task_priority: task_priority,
+                    task_status: task_status,
                 },
                 success: function(data) {
-                    let html;
-                    html = createRowFromHtml(data.projectId, data.projectTitle, data.projectDescription, data.projectStatus, data.projectTasks, data.projectPending);
-                    $("#projects-table").append(html);
-                    $("#createProjectModal").hide();
+                    $("#createTaskModal").hide();
                     $('body').removeClass('modal-open');
                     $('.modal-backdrop').remove();
                     $('body').css({
                         overflow: 'auto'
                     });
+                    let html;
+                    html = createRowFromHtml(data.taskUser, data.taskId, data.taskTitle, data.taskDescription, data.taskPriority, data.taskStatus, data.taskCreated, data.taskUpdated);
+                    $("#tasks-table").append(html);
                     $("#alert").removeClass("d-none");
-                    $("#alert").html(data.projectTitle + " " + data.successMessage);
-                    $('#project_title').val('');
-                    $('#project_description').val('');
-                    $('.clear-inpput').empty();
+                    $("#alert").html(data.taskTitle + " " + data.successMessage);
+                    $('#task_title').val('');
+                    $('#task_description').val('');
+                    $('#task_status').val('');
+                    $('#task_priority').val('');
                 }
             });
         });
@@ -250,14 +424,13 @@
 
         $(document).on('click', '.delete-task', function() {
 
+            
+
             var dialog = confirm('Are you sure that you want to delete this task?');
 
-            if (dialog) {
-
+            if (dialog) {              
                 let taskid;
                 taskid = $(this).attr('data-taskid');
-
-
                 $.ajax({
                     type: 'POST',
                     url: '/projects/destroyTask/' + taskid,
