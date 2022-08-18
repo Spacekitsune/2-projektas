@@ -15,15 +15,15 @@ use Illuminate\Support\Facades\Auth;
 */
 // Facebook Login URL
 Route::prefix('facebook')->name('facebook.')->group( function(){
-    Route::get('auth', [FaceBookController::class, 'loginUsingFacebook'])->name('login');
-    Route::get('callback', [FaceBookController::class, 'callbackFromFacebook'])->name('callback');
+    Route::get('auth', 'App\Http\Controllers\FaceBookController@loginUsingFacebook')->name('login');
+    Route::get('callback', 'App\Http\Controllers\FaceBookController@callbackFromFacebook')->name('callback');
 });
 
 
 // Google URL
 Route::prefix('google')->name('google.')->group( function(){
-    Route::get('login', [GoogleController::class, 'loginWithGoogle'])->name('login');
-    Route::any('callback', [GoogleController::class, 'callbackFromGoogle'])->name('callback');
+    Route::get('login', 'App\Http\Controllers\GoogleController@loginWithGoogle')->name('login');
+    Route::any('callback', 'App\Http\Controllers\GoogleController@callbackFromGoogle')->name('callback');
 });
 
 Auth::routes();

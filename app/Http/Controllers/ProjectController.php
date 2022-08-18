@@ -1,7 +1,5 @@
 <?php
 
-//comment here
-
 namespace App\Http\Controllers;
 
 use App\Models\Project;
