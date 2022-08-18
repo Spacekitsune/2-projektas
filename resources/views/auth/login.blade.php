@@ -53,10 +53,17 @@
 
                         <div class="row mb-0">
                             <div class="col-md-8 offset-md-4">
-                                <button type="submit" class="btn btn-primary">
+                                <button type="submit" class="btn btn-success">
                                     {{ __('Login') }}
                                 </button>
-
+                                <button type="submit" class="btn btn-primary">
+                                <i class="fa fa-facebook" aria-hidden="true"></i>
+                                {{ __('Facebook') }}
+                                </button>
+                                <button type="submit" class="btn btn-danger">
+                                <i class="fa fa-google" aria-hidden="true"></i>
+                                {{ __('Google') }}
+                                </button>
                                 @if (Route::has('password.request'))
                                     <a class="btn btn-link" href="{{ route('password.request') }}">
                                         {{ __('Forgot Your Password?') }}

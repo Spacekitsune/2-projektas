@@ -1,5 +1,7 @@
 <?php
 
+//comment here
+
 namespace App\Http\Controllers;
 
 use App\Models\Project;
@@ -22,7 +24,7 @@ class ProjectController extends Controller
     }
 
     /**
-     * Display a listing of the resource.
+     * Display a listing of the resource
      *
      * @return \Illuminate\Http\Response
      */
@@ -90,7 +92,7 @@ class ProjectController extends Controller
         $project->save();
         $project->users()->attach($user);
         // $project->users()->attach($request->project_user);
-        if (count($request->project_user) != 0) {
+        if (!empty($request->project_user)) {
             $users = User::all();
             foreach ($request->project_user as $project_user) {
                 foreach ($users as $user) {

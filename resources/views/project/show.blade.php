@@ -24,7 +24,7 @@
 
         <div class="col-sm-4">
             <h2>To do</h2>
-            <div class="card p-1 draggable-container" style="min-height: 100px">
+            <div id="to-do" class="card p-1 draggable-container" style="min-height: 100px">
                 @foreach ($project-> projectTasks as $task)
                 @if ($task->status_id==1)
                 <div class="draggable card-body border border-danger m-2 rounded-lg task{{$task->id}}" draggable="true">
@@ -42,7 +42,7 @@
                         <button type="submit" class="btn text-danger border-danger btn-sm delete-task" data-taskid="{{$task->id}}" title="Delete task">
                             <i class="fa fa-trash" aria-hidden="true"></i>
                         </button>
-                    </div> 
+                    </div>
                 </div>
                 @endif
                 @endforeach
@@ -52,10 +52,10 @@
 
         <div class="col-sm-4">
             <h2>In proggress</h2>
-            <div class="card p-1 draggable-container" style="min-height: 50px">
+            <div id="in-progress" class="card p-1 draggable-container" style="min-height: 50px">
                 @foreach ($project-> projectTasks as $task)
                 @if ($task->status_id==2)
-                <div class="draggable card-body border border-danger m-2 rounded-lg task{{$task->id}}" draggable="true" >
+                <div class="draggable card-body border border-danger m-2 rounded-lg task{{$task->id}}" draggable="true">
                     <h5>{{$task->title}}</h5>
                     <div class="d-inline-flex ">
                         <button class="btn btn-dark font-weight-bolder rounded-circle px-3" title="{{$task->taskUser->name}}">{{substr($task->taskUser->name,0,1)}}</button>
@@ -79,7 +79,7 @@
 
         <div class="col-sm-4">
             <h2>Done</h2>
-            <div class="card p-1 draggable-container" style="min-height: 100px">
+            <div id="done" class="card p-1 draggable-container" style="min-height: 100px">
                 @foreach ($project-> projectTasks as $task)
                 @if ($task->status_id==3)
                 <div class="draggable card-body border border-danger m-2 rounded-lg task{{$task->id}}" draggable="true">
@@ -234,26 +234,13 @@
 </script> -->
 
 <script>
-    $(document).ready(function() {
-
-
-
-        function createRowFromHtml(taskUser, taskId, taskTitle, taskDescription, taskPriority, taskStatus, taskCreated, taskUpdated) {
-            $(".template tr").addClass("task" + taskId);
-            $(".template .show-task").attr('data-taskid', taskId);
-            $(".template .edit-task").attr('data-taskid', taskId);
-            $(".template .delete-task").attr('data-taskid', taskId);
-            $(".template .col-task-user").html(taskUser);
-            $(".template .col-task-id").html(taskId);
-            $(".template .col-task-title").html(taskTitle);
-            $(".template .col-task-description").html(taskDescription);
-            $(".template .col-task-priority").html(taskPriority);
-            $(".template .col-task-status").html(taskStatus);
-            $(".template .col-task-created").html(taskCreated);
-            $(".template .col-task-updated").html(taskUpdated);
-            return $(".template tbody").html();
+    $.ajaxSetup({
+        headers: {
+            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
         }
+    });
 
+    $(document).ready(function() {
         //AJAX STORE DALIS:
 
         $("#add-new-task").click(function() {
@@ -290,7 +277,7 @@
 
             $.ajax({
                 type: 'POST',
-                url: '{{route("project.storeTask")}}',
+                url: ' {{ route("project.storeTask") }}',
                 data: {
                     project_id: project_id,
                     task_title: task_title,
@@ -300,21 +287,57 @@
                     task_status: task_status,
                 },
                 success: function(data) {
+                    let templateCard = `<div class="template-card draggable card-body border border-danger m-2 rounded-lg" draggable="true">
+                    <h5></h5>
+                    <div class="d-inline-flex ">
+                        <button class="btn btn-dark font-weight-bolder rounded-circle px-3 task-user" title=""></button>
+                    </div>
+                    <div class="d-inline-flex justify-content-end">
+                        <button type="button" class="btn text-primary border-primary btn-sm show-task" data-bs-toggle="modal" data-bs-target="#showTaskModal" data-taskid="" title="Quick view task">
+                            <i class="fa fa-eye" aria-hidden="true"></i>
+                        </button>
+                        <button type="button" class="btn text-success border-success btn-sm edit-task" data-bs-toggle="modal" data-bs-target="#editTaskModal" data-taskid="" title="Edit task">
+                            <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+                        </button>
+                        <button type="submit" class="btn text-danger border-danger btn-sm delete-task" data-taskid="" title="Delete task">
+                            <i class="fa fa-trash" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>`;
+
+                   
+                    if (data.taskStatus == 1) {
+                        $("#to-do").append(templateCard);
+                    } else if (data.taskStatus == 2) {
+                        $("#in-progress").append(templateCard);
+                    } else {
+                        $("#done").append(templateCard);
+                    }
+
+                    $(".template-card").addClass("task" + data.taskId);
+                    $(".template-card .show-task").attr('data-taskid', data.taskId);
+                    $(".template-card .edit-task").attr('data-taskid', data.taskId);
+                    $(".template-card .delete-task").attr('data-taskid', data.taskId);
+                    $(".template-card h5").html(data.taskTitle);
+                    $(".template-card .task-user").attr('titleUser', data.taskUser);
+                    let  initialLetter='{{substr(' +data.taskUser+ ',0,1)}}';
+                    $(".template-card .task-user").html(initialLetter);
+
+
+                    $("#alert").removeClass("d-none");
                     $("#createTaskModal").hide();
                     $('body').removeClass('modal-open');
                     $('.modal-backdrop').remove();
                     $('body').css({
                         overflow: 'auto'
                     });
-                    let html;
-                    html = createRowFromHtml(data.taskUser, data.taskId, data.taskTitle, data.taskDescription, data.taskPriority, data.taskStatus, data.taskCreated, data.taskUpdated);
-                    $("#tasks-table").append(html);
-                    $("#alert").removeClass("d-none");
-                    $("#alert").html(data.taskTitle + " " + data.successMessage);
                     $('#task_title').val('');
                     $('#task_description').val('');
                     $('#task_status').val('');
                     $('#task_priority').val('');
+
+
+
                 }
             });
         });
@@ -424,11 +447,11 @@
 
         $(document).on('click', '.delete-task', function() {
 
-            
+
 
             var dialog = confirm('Are you sure that you want to delete this task?');
 
-            if (dialog) {              
+            if (dialog) {
                 let taskid;
                 taskid = $(this).attr('data-taskid');
                 $.ajax({
