@@ -1,15 +1,16 @@
 @extends('layouts.app')
 @section('content')
 
+<script src="{{url('js/drag.js')}}" defer></script>
+
+<div class="container mb-4" style="position: sticky; top: 10px">
+    <a type="button" class="btn btn-secondary mb-2" href="{{route('project.index')}}">
+        <i class="fa fa-angle-left" aria-hidden="true"></i>
+        Back to projects
+    </a>
+</div>
+
 <div class="container">
-
-    <div class="container" style="position: sticky; top: 10px">
-        <a type="button" class="btn btn-secondary mb-2" href="{{route('project.index')}}">
-            <i class="fa fa-angle-left" aria-hidden="true"></i>
-            Back to projects
-        </a>
-    </div>
-
 
     <h1>{{ $project->title }}</h1>
     <button id="add-new-task" data-projectid="{{$project->id}}" type="button" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#createTaskModal">
@@ -19,9 +20,6 @@
 
 
     <div class="row my-2" style="min-height: 100px;">
-
-
-
         <div class="col-sm-4">
             <h2>To do</h2>
             <div id="to-do" class="card p-1 draggable-container" style="min-height: 100px">
@@ -104,134 +102,7 @@
             </div>
         </div>
     </div>
-
-
-
-    <!-- <div class="container">
-        @if (count($project->projectTasks)==0)
-        <p>The are no tasks in this project</p>
-        @else
-        <table id="tasks-table" class="table table-striped mt-2">
-
-            <tr>
-                <th>User</th>
-                <th>Id</th>
-                <th>Task title</th>
-                <th>Description</th>
-                <th>Priority</th>
-                <th>Status</th>
-                <th>Created</th>
-                <th>Updated</th>
-                <th>Actions</th>
-            </tr>
-
-            @foreach ($project-> projectTasks as $task)
-            <tr class="task{{$task->id}}">
-                <td class="col-task-user">{{$task->taskUser->name}}</td>
-                <td class="col-task-id">{{$task->id}}</td>
-                <td class="col-task-title">{{$task->title}}</td>
-                <td class="col-task-description" style="width: 35%">{{$task->description}}</td>
-                <td class="col-task-priority row-color">{{$task->taskPriority->title}}</td>
-                <td class="col-task-status" style="width: 10%">{{$task->taskStatus->title}}</td>
-                <td class="col-task-created">{{$task->created_at}}</td>
-                <td class="col-task-updated">{{$task->updated_at}}</td>
-                <td style="width: 15%">
-                    <button type="button" class="btn btn-primary show-task" data-bs-toggle="modal" data-bs-target="#showTaskModal" data-taskid="{{$task->id}}">
-                        <i class="fa fa-eye" aria-hidden="true"></i>
-                    </button>
-                    <button type="button" class="btn btn-success edit-task" data-bs-toggle="modal" data-bs-target="#editTaskModal" data-taskid="{{$task->id}}">
-                        <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
-                    </button>
-                    <button class="btn btn-danger delete-task" type="submit" data-taskid="{{$task->id}}">
-                        <i class="fa fa-trash" aria-hidden="true"></i>
-                    </button>
-                </td>
-            </tr>
-            @endforeach
-        </table>
-        <table class="template d-none">
-        <tr>
-        <td class="col-task-user"></td>
-            <td class="col-task-id"></td>
-            <td class="col-task-title"></td>
-            <td class="col-task-description"></td>
-            <td class="col-task-priority"></td>
-            <td class="col-task-status"></td>
-            <td class="col-task-created"></td>
-            <td class="col-task-updated"></td>
-            <td>
-                <button type="button" class="btn btn-primary show-task" data-bs-toggle="modal" data-bs-target="#showTaskModal" data-tasktid="" title="Quick view task">
-                    <i class="fa fa-eye" aria-hidden="true"></i>
-                </button>
-                <button type="button" class="btn btn-success edit-task" data-bs-toggle="modal" data-bs-target="#editTaskModal" data-tasktid="" title="Edit task">
-                    <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
-                </button>
-                <button type="submit" class="btn btn-danger delete-task" data-tasktid="" title="Delete task">
-                    <i class="fa fa-trash" aria-hidden="true"></i>
-                </button>
-            </td>
-        </tr>
-    </table>
-        @endif
-    </div> -->
-
-
-
 </div>
-
-<!-- <script>
-    const draggables = document.querySelectorAll('.draggable');
-    const containers = document.querySelectorAll('.draggable-container');
-
-    draggables.forEach(draggable => {
-        draggable.addEventListener('dragstart', () => {
-            console.log('hello');
-            draggable.classList.add('dragging');
-        })
-
-        draggable.addEventListener('dragend', () => {
-            draggable.classList.remove('dragging');
-        })
-    })
-
-    containers.forEach(container => {
-        container.addEventListener('dragover', e => {
-            e.preventDefault();
-            const afterElement = getDragAfterElement(container, e.clientY);
-            const draggable = document.querySelector('.dragging');
-            if (afterElement == null) {
-                container.appendChild(draggable);
-            } else {
-                container.insertBefore(draggable, afterElement);
-            }
-        })
-    })
-
-    function getDragAfterElement(container, y) {
-        const draggableElements = [...container.querySelectorAll('.draggable:not(.dragging)')];
-
-        return draggableElements.reduce((closest, child) => {
-            const box = child.getBoundingClientRect();
-            const offset = y - box.top - box.height / 2;
-            if (offset < 0 && offset > closest.offset) {
-                return {
-                    offset: offset,
-                    element: child
-                }
-            } else {
-                return closest
-            }
-        }, {
-            offset: Number.NEGATIVE_INFINITY
-        }).element
-    }
-
-    $.ajaxSetup({
-        headers: {
-            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-        }
-    });
-</script> -->
 
 <script>
     $.ajaxSetup({
@@ -305,7 +176,7 @@
                     </div>
                 </div>`;
 
-                   
+
                     if (data.taskStatus == 1) {
                         $("#to-do").append(templateCard);
                     } else if (data.taskStatus == 2) {
@@ -320,7 +191,7 @@
                     $(".template-card .delete-task").attr('data-taskid', data.taskId);
                     $(".template-card h5").html(data.taskTitle);
                     $(".template-card .task-user").attr('titleUser', data.taskUser);
-                    let  initialLetter='{{substr(' +data.taskUser+ ',0,1)}}';
+                    let initialLetter = '{{substr(' + data.taskUser + ',0,1)}}';
                     $(".template-card .task-user").html(initialLetter);
 
 
