@@ -9,6 +9,7 @@ use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Monolog\Handler\PushoverHandler;
 use App\Exports\ProjectExport;
 use Excel;
@@ -261,14 +262,58 @@ class ProjectController extends Controller
 
         $user = Auth::user();
 
+        $projects = $user->projects;
+        $total_projects=count($projects);
 
+        
 
-        $projects = $user->projects::where('title', 'LIKE', '%' . $search_key . '%')
-            ->orWhere('description', 'LIKE', '%' . $search_key . '%')
-            ->get();
+        $pending_projects = 0;
+        $completed_projects = 0;
 
+        foreach ($projects as $project) {
+            $pending_tasks = 0;
+            if ($project->status_id != 3) {
+                $pending_projects++;
+            } else {
+                $completed_projects++;
+            }
 
-        return view('project.search', ['projects' => $projects]);
+            if (count($project->projectTasks) == 0) {
+                $project->pending_tasks = 0;
+            }
+
+            foreach ($project->projectTasks as $task) {
+                if ($task->status_id != 3) {
+                    $pending_tasks++;
+                }
+                $project->pending_tasks = $pending_tasks;
+            }
+        }
+
+        $collection = collect($projects);
+
+        
+
+        if ($search_key=='done') {
+            $projects = $collection->where('status_id', '=', 3)->all(); 
+        }
+
+        else if ($search_key=='pending') {
+            $projects1 = $collection->where('status_id', '=', 1); 
+            $projects2 = $collection->where('status_id', '=', 2); 
+            $projects = $projects1->concat($projects2)->all();
+        }        
+
+        else {
+            $projects1 = $collection->where('title', 'LIKE', '%'.$search_key.'%'); 
+            $projects2 = $collection->where('description', 'LIKE', '%'.$search_key.'%'); 
+            $projects = $projects1->concat($projects2)->all();
+        }
+        
+        
+        
+        return view("project.search", ['projects' => $projects, 'pending_projects' => $pending_projects, 'completed_projects' => $completed_projects, 'total_projects' => $total_projects]);
+   
     }
 
     
