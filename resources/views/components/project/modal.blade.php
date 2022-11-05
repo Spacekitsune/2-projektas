@@ -21,7 +21,6 @@
                             Add more users
                         </button>
                     </div>
-
                 </div>
             </div>
             <div class="modal-footer">
@@ -77,6 +76,7 @@
                         <textarea id="edit_project_description" class="form-control" name="project_description" cols="30" rows="5"></textarea>
                     </div>
                     <div class="edit-inputs-field-wrap form-group">
+                        <div class="edit-project-users"></div>
                         <button id="edit-project-add-users" class="btn btn-primary my-2">
                             <i class="fa fa-plus" aria-hidden="true"></i>
                             Add more users

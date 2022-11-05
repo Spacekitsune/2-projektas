@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Project;
 use App\Models\User;
 use App\Models\Task;
+use App\Models\ProjectUser;
 use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
 use Illuminate\Http\Request;
@@ -58,9 +59,6 @@ class ProjectController extends Controller
         return view("project.index", ['projects' => $projects, 'pending_projects' => $pending_projects, 'completed_projects' => $completed_projects]);
     }
 
-    //     return view("project.index", ['projects' => $projects]);
-    // }
-
     /**
      * Show the form for creating a new resource.
      *
@@ -79,7 +77,6 @@ class ProjectController extends Controller
      */
     public function store(Request $request)
     {
-
         //Kuriamas naujas objektas iš Request reikšmių, siuntimui į db
         $user = Auth::user();
         // $users=[$user];
@@ -134,8 +131,6 @@ class ProjectController extends Controller
 
     public function showAjax(Project $project)
     {
-
-
         $project_users = [];
         foreach ($project->users as $user) {
             // array_push($project_users, $user->name);
@@ -174,19 +169,19 @@ class ProjectController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, Project $project)
-    {
-
+    {   
         $project->title = $request->project_title;
-        $project->description = $request->project_description;
+        $project->description = $request->project_description;        
         $project->save();
+        $project->users()->detach();
 
-        if (count($request->project_user) != 0) {
+        if (!empty($request->project_user)) {
             $users = User::all();
             foreach ($request->project_user as $project_user) {
                 foreach ($users as $user) {
                     if ($user->email == $project_user) {
                         $project->users()->attach($user->id);
-                    }
+                    } 
                 }
             }
         }
