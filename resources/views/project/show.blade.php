@@ -83,7 +83,7 @@
                 <div class="draggable card-body border border-danger m-2 rounded-lg task{{$task->id}}" draggable="true">
                     <h5>{{$task->title}}</h5>
                     <div class="d-inline-flex ">
-                        <button class="btn btn-dark font-weight-bolder rounded-circle px-3" title="{{$task->taskUser->name}}">{{substr($task->taskUser->name,0,1)}}</button>
+                        <button class="btn btn-dark font-weight-bolder rounded-circle px-3 first-user-letter" title="{{$task->taskUser->name}}">{{substr($task->taskUser->name,0,1)}}</button>
                     </div>
                     <div class="d-inline-flex justify-content-end">
                         <button type="button" class="btn text-primary border-primary btn-sm show-task" data-bs-toggle="modal" data-bs-target="#showTaskModal" data-taskid="{{$task->id}}" title="Quick view task">
@@ -112,8 +112,8 @@
     });
 
     $(document).ready(function() {
-        //AJAX STORE DALIS:
 
+        //AJAX STORE DALIS:
         $("#add-new-task").click(function() {
             let projectid;
             projectid = $(this).attr('data-projectid');
@@ -148,7 +148,7 @@
 
             $.ajax({
                 type: 'POST',
-                url: ' {{ route("project.storeTask") }}',
+                url: ' {{route("project.storeTask")}}',
                 data: {
                     project_id: project_id,
                     task_title: task_title,
@@ -191,11 +191,8 @@
                     $(".template-card .delete-task").attr('data-taskid', data.taskId);
                     $(".template-card h5").html(data.taskTitle);
                     $(".template-card .task-user").attr('titleUser', data.taskUser);
-                    let initialLetter = '{{substr(' + data.taskUser + ',0,1)}}';
+                    let initialLetter = data.taskUser.slice(0,1);
                     $(".template-card .task-user").html(initialLetter);
-
-
-                    $("#alert").removeClass("d-none");
                     $("#createTaskModal").hide();
                     $('body').removeClass('modal-open');
                     $('.modal-backdrop').remove();
@@ -206,120 +203,122 @@
                     $('#task_description').val('');
                     $('#task_status').val('');
                     $('#task_priority').val('');
-
-
-
+                    alert(data.successMessage);
                 }
             });
         });
 
         // SHOW AJAX dalis
-
-        $(document).on('click', '.show-project', function() {
-            let projectid;
-            projectid = $(this).attr('data-projectid');
+        $(document).on('click', '.show-task', function() {
+            let taskid;
+            taskid = $(this).attr('data-taskid');
             $.ajax({
                 type: 'GET',
-                url: '/projects/showAjax/' + projectid,
+                url: '/projects/showTask/' + taskid,
                 success: function(data) {
-                    $('.show-project-title').html("Project title: " + data.projectTitle);
-                    $('.show-project-id').html("Project id: " + data.projectId);
-                    $('.show-project-description').html("Project description: " + data.projectDescription);
-                    $('.show-project-tasks').html("Total tasks: " + data.projectTasks);
-                    $('.show-project-users').html("<h6>Project participants:</h6>")
-                    for (i = 0; i < data.projectUsers.length; i++) {
-                        $('.show-project-users').append("<li>" + data.projectUsers[i] + "</li>");
-                    }
-                    $('#open-ajax-form-project').attr("href", "/projects/show/" + projectid);
-
+                    $('.show-task-title').html("Task title: " + data.taskTitle);
+                    $('.show-task-id').html("<b>Task id:</b> " + data.taskId);
+                    $('.show-task-description').html("<b>Task description:</b> " + data.taskDescription);
+                    $('.show-task-user').html("<b>User assigned to:</b> " + data.taskUserName);
+                    $('.show-task-status').html("<b>Task status:</b> " + data.taskStatus);
+                    $('.show-task-priority').html("<b>Task priority:</b> " + data.taskPriority);                  
                 }
             });
         });
 
         // EDIT UPDATE AJAX dalis         
-        $(document).on('click', '.edit-project', function() {
-
-            let projectid;
-            projectid = $(this).attr('data-projectid');
+        $(document).on('click', '.edit-task', function() {
+            let taskid;
+            taskid = $(this).attr('data-taskid');
             $.ajax({
                 type: 'GET',
-                url: '/projects/showAjax/' + projectid,
+                url: '/projects/showTask/' + taskid,
                 success: function(data) {
-                    $('#edit_project_id').val(data.projectId);
-                    $('#edit_project_title').val(data.projectTitle);
-                    $('#edit_project_description').val(data.projectDescription);
+                    $('#edit_task_id').val(data.taskId);
+                    $('#edit_task_title').val(data.taskTitle);
+                    $('#edit_task_description').val(data.taskDescription);
+
                     $.each(data.projectUsers, function(index, value) {
-                        $('.edit-inputs-field-wrap').prepend('<div class="input-group mb-3 clear-inpput"><input type="text" class="project_user form-control" value="' + value + '" aria-label="Add user" aria-describedby="button-addon2"><button class="btn btn-outline-danger remove_project-user" type="button" title="Remove"><i class="fa fa-times d-inline-block" aria-hidden="true"></i></button></div>');
-                    });
-                    $('.edit-inputs-field-wrap').prepend('<label for="project_description">Project participants</label>');
-
-                    let max_fields = 10;
-                    let x = data.projectUsers.length;
-
-                    $('#edit-project-add-users').click(function(e) {
-                        e.preventDefault();
-                        if (x < max_fields) {
-                            x++;
-                            $('.edit-inputs-field-wrap').append(append_text);
+                        if (data.taskUserId == index) {
+                        $('#edit_task_user').append('<option selected value="'+index+'">' + value + '</option>');
                         } else {
-                            alert('Maximum project users limit was reached');
+                            $('#edit_task_user').append('<option value="'+index+'">' + value + '</option>');
                         }
-                    })
-
-                    $('.edit-inputs-field-wrap').on("click", ".remove_project-user", function(e) {
-                        e.preventDefault();
-                        $(this).parent('div').remove();
-                        x--;
-
-                    })
+                    });
+                    
+                    if (data.taskPriority === 'Medium') {
+                        $( "select#edit_task_priority option:eq(1)" ).attr("selected","");
+                    } else if (data.taskPriority === 'High') {
+                        $( "select#edit_task_priority option:eq(2)" ).attr("selected","");
+                    }                       
+                   
+                    if (data.taskStatus === 'In progress') {
+                        $( "select#edit_task_status option:eq(1)" ).attr("selected","");
+                    } else if (data.taskStatus === 'Done') {
+                        $( "select#edit_task_status option:eq(2)" ).attr("selected","");
+                    }                
                 }
             });
         });
 
 
-        $(document).on('click', '#update-project', function() {
-            var project_user = new Array();
-            $('.project_user').each(function() {
-                project_user.push($(this).val());
-            });
+        $(document).on('click', '.close-task-edit', function() {
+            $('#edit_task_user').children('option').remove();
+            $( "select#edit_task_priority option:eq(1)" ).removeAttr("selected","");
+            $( "select#edit_task_priority option:eq(2)" ).removeAttr("selected","");
+            $( "select#edit_task_status option:eq(1)" ).removeAttr("selected","");
+            $( "select#edit_task_status option:eq(2)" ).removeAttr("selected","");
+        })
 
-            project_user = project_user.filter(distinct);
+        $(document).on('click', '#update-task', function() {            
+            let taskid;
+            let task_title;
+            let task_description;
+            let task_user;
+            let task_priority;
+            let task_status;
 
-            let projectid;
-            let project_title;
-            let project_description;
-            projectid = $('#edit_project_id').val();
-            project_title = $('#edit_project_title').val();
-            project_description = $('#edit_project_description').val();
+            taskid = $('#edit_task_id').val();
+            task_title = $('#edit_task_title').val();
+            task_description = $('#edit_task_description').val();
+            task_user = $('#edit_task_user').val();
+            task_status = $('#edit_task_status').val();
+            task_priority = $('#edit_task_priority').val();
             $.ajax({
                 type: 'POST',
-                url: '/projects/update/' + projectid,
+                url: '/projects/updateTask/' + taskid,
                 data: {
-                    project_title: project_title,
-                    project_description: project_description,
-                    project_user: project_user
+                    task_title: task_title,
+                    task_description: task_description,
+                    task_user: task_user,
+                    task_status: task_status,
+                    task_priority: task_priority
                 },
                 success: function(data) {
-                    $(".project" + projectid + " " + ".col-project-title").html(data.projectTitle)
-                    $(".project" + projectid + " " + ".col-project-description").html(data.projectDescription)
-                    $("#alert").removeClass("d-none");
-                    $("#alert").html(data.successMessage);
-                    $("#editProjectModal").hide();
+                    $("#editTaskModal").hide();
                     $('body').removeClass('modal-open');
                     $('.modal-backdrop').remove();
                     $('body').css({
                         overflow: 'auto'
                     });
+                    $(".task" + taskid + " " + "h5").html(data.taskTitle);
+                    let initialLetter = data.taskUser.slice(0,1);                    
+                    $(".task" + taskid + " " + ".first-user-letter").html(initialLetter);
+                    let element = $(".task" + taskid)[0];                                      
+                    if (data.taskStatus==1) {
+                        $("#to-do").append(element);
+                    } else if (data.taskStatus==2) {
+                        $("#in-progress").append(element);
+                    } else {
+                        $("#done").append(element);
+                    }                    
+                    alert(data.successMessage);
                 }
             });
         })
 
         //DELETE TASK CONFIRMATION
-
         $(document).on('click', '.delete-task', function() {
-
-
-
             var dialog = confirm('Are you sure that you want to delete this task?');
 
             if (dialog) {

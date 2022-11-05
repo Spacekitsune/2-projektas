@@ -42,6 +42,8 @@ Route::prefix('projects')->group(function () {
     Route::post('destroyWithTasks/{project}', 'App\Http\Controllers\ProjectController@destroyWithTasks')->name('project.destroyWithTasks');
    
     Route::post('storeTask', 'App\Http\Controllers\TaskController@store')->name('project.storeTask');
+    Route::get('showTask/{task}', 'App\Http\Controllers\TaskController@showAjax')->name('project.showTask');
+    Route::post('updateTask/{task}', 'App\Http\Controllers\TaskController@update')->name('project.updateTask');
     Route::post('destroyTask/{task}', 'App\Http\Controllers\TaskController@destroy')->name('task.destroyTask');
     Route::get('search', 'App\Http\Controllers\ProjectController@search')->name('project.search');
 });

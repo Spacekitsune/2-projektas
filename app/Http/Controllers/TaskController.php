@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Task;
+use App\Models\ProjectUser;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
 use Illuminate\Http\Request;
@@ -41,18 +42,15 @@ class TaskController extends Controller
         $users = User::all();
                
         $task = new Task;
-
         $task->title = $request->task_title;
         $task->description = $request->task_description;
         $task->project_id = $request->project_id;
 
-
         foreach ($users as $user){
         if ($user->email == $request->task_user) {
             $task->user_id = $user->id;
-            $task_user_name=$user->name;
-        }
-    }
+            $task_user_name = $user->name;
+        }    }
         
         $task->status_id = $request->task_status;
         $task->priority_id = $request->task_priority;
@@ -87,6 +85,36 @@ class TaskController extends Controller
         //
     }
 
+    public function showAjax(Task $task)
+    {
+        $users_in_project=ProjectUser::where('project_id', $task->project_id )->get('user_id');
+        $users = User::all();
+        $project_users = [];
+        foreach ($users_in_project as $value) {
+            foreach ($users as $user) {
+                if ($value->user_id == $user->id) {
+            $project_users += array($user->id => $user->name);
+                }
+            }
+        }
+
+        $task_array = array(
+            'successMessage' => "Task retrieved succesfuly",
+            'taskId' => $task->id,
+            'taskTitle' => $task->title,
+            'taskDescription' => $task->description,
+            'taskProject' => $task->project_id,
+            'taskUserName' => $task->taskUser->name,
+            'taskUserId' => $task->taskUser->id,
+            'taskStatus' => $task->taskStatus->title,
+            'taskPriority' => $task->taskPriority->title,   
+            'projectUsers' => $project_users        
+        );
+        $json_response = response()->json($task_array);
+        return $json_response;
+    }
+
+
     /**
      * Show the form for editing the specified resource.
      *
@@ -105,9 +133,30 @@ class TaskController extends Controller
      * @param  \App\Models\Task  $task
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateTaskRequest $request, Task $task)
+    public function update(Request $request, Task $task)
     {
-        //
+        $task->title = $request->task_title;
+        $task->description = $request->task_description; 
+        $task->user_id = $request->task_user;
+        $task->status_id = $request->task_status;
+        $task->priority_id = $request->task_priority;       
+        $task->save();
+              
+
+        $project_array = array(
+            'successMessage' => "Task updated succesfuly",
+            'taskId' => $task->id,
+            'taskTitle' => $task->title,
+            'taskDescription' => $task->description,
+            'taskProjectId' => $task->project_id,
+            'taskUser' => $task->taskUser->name,
+            'taskStatus' => $task->status_id,
+            'taskPriority' => $task->priority_id,
+        );
+
+        $json_response = response()->json($project_array);
+
+        return $json_response;
     }
 
     /**
@@ -122,9 +171,7 @@ class TaskController extends Controller
             $success_array = array(
                 'destroyMessage' => $task->title . " project deleted successfuly"
             );
-
             $json_response = response()->json($success_array);
-
             return $json_response;
         }
     

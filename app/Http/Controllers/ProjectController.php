@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Project;
 use App\Models\User;
 use App\Models\Task;
-use App\Models\ProjectUser;
 use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
 use Illuminate\Http\Request;
@@ -79,15 +78,12 @@ class ProjectController extends Controller
     {
         //Kuriamas naujas objektas iš Request reikšmių, siuntimui į db
         $user = Auth::user();
-        // $users=[$user];
-        // $project=Project::create($request->all);
         $project = new Project;
         $project->title = $request->project_title;
         $project->description = $request->project_description;
         $project->status_id = 1;
         $project->save();
         $project->users()->attach($user);
-        // $project->users()->attach($request->project_user);
         if (!empty($request->project_user)) {
             $users = User::all();
             foreach ($request->project_user as $project_user) {
@@ -133,7 +129,6 @@ class ProjectController extends Controller
     {
         $project_users = [];
         foreach ($project->users as $user) {
-            // array_push($project_users, $user->name);
             $project_users += array($user->email => $user->name);
         }
 
@@ -210,29 +205,20 @@ class ProjectController extends Controller
         $tasks = $project->projectTasks;
 
         if (count($tasks) != 0) {
-
             $error_array = array(
                 'answer' => false,
                 'destroyMessage' => $project->title . " project can't be deleted. Project has assigned tasks. Delete anyway?"
             );
-
             $json_response = response()->json($error_array);
             return $json_response;
         } else {
-
             $project->delete();
             $project->users()->detach($project->id);
-            // Report::destroy($report_id);
-
-            // ReportMessages::where('report_id', $report_id)->delete();
-
             $success_array = array(
                 'answer' => true,
                 'destroyMessage' => $project->title . " project deleted successfuly"
             );
-
             $json_response = response()->json($success_array);
-
             return $json_response;
         }
     }

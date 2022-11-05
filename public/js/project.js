@@ -85,12 +85,11 @@ $(document).ready(function() {
                 $('.modal-backdrop').remove();
                 $('body').css({
                     overflow: 'auto'
-                });
-                $("#alert").removeClass("d-none");
-                $("#alert").html(data.projectTitle + " " + data.successMessage);
+                });                
                 $('#project_title').val('');
                 $('#project_description').val('');
                 $('.clear-inpput').empty();
+                alert(data.projectTitle + " " + data.successMessage);
             }
         });
     });
@@ -104,14 +103,14 @@ $(document).ready(function() {
             type: 'GET',
             url: '/projects/showAjax/' + projectid,
             success: function(data) {
-                $('.show-project-title').html("Project title: " + data.projectTitle);
-                $('.show-project-id').html("Project id: " + data.projectId);
-                $('.show-project-description').html("Project description: " + data.projectDescription);
-                $('.show-project-tasks').html("Total tasks: " + data.projectTasks);
-                $('.show-project-users').html("<h6>Project participants:</h6>")
-                for (i = 0; i < data.projectUsers.length; i++) {
-                    $('.show-project-users').append("<li>" + data.projectUsers[i] + "</li>");
-                }
+                $('.show-project-title').html("<b>Project title: </b>" + data.projectTitle);
+                $('.show-project-id').html("<b>Project id: </b>" + data.projectId);
+                $('.show-project-description').html("<b>Project description: </b>" + data.projectDescription);
+                $('.show-project-tasks').html("<b>Total tasks: </b>" + data.projectTasks);
+                $('.show-project-users').html("<b>Project participants: </b>");
+                $.each(data.projectUsers, function(index, value) {
+                    $('.show-project-users').append("<li>" + value + "</li>");
+                });
                 $('#open-ajax-form-project').attr("href", "/projects/show/" + projectid);
 
             }
@@ -120,7 +119,7 @@ $(document).ready(function() {
 
     // EDIT UPDATE AJAX dalis         
     $(document).on('click', '.edit-project', function() {
-
+        $('.edit-project-users').children('div').remove();     
         let projectid;
         projectid = $(this).attr('data-projectid');
         $.ajax({
@@ -131,89 +130,92 @@ $(document).ready(function() {
                 $('#edit_project_title').val(data.projectTitle);
                 $('#edit_project_description').val(data.projectDescription);
                 $.each(data.projectUsers, function(index, value) {
-                    $('.edit-inputs-field-wrap').prepend('<div class="input-group mb-3 clear-inpput"><input type="text" class="project_user form-control" value="' + value + '" aria-label="Add user" aria-describedby="button-addon2"><button class="btn btn-outline-danger remove_project-user" type="button" title="Remove"><i class="fa fa-times d-inline-block" aria-hidden="true"></i></button></div>');
+                    $('.edit-project-users').prepend('<div class="input-group mb-3 clear-inpput"><label for="user_name">'+value+'</label><input type="text" class="project_user form-control" name="user_name" value="'+index+'" aria-label="Add user" aria-describedby="button-addon2"><button class="btn btn-outline-danger remove_project-user" type="button" title="Remove"><i class="fa fa-times d-inline-block" aria-hidden="true"></i></button></div>');
                 });
-                $('.edit-inputs-field-wrap').prepend('<label for="project_description">Project participants</label>');
+                $('.edit-project-users').prepend('<div><h6>Project participants</h6></div>');
 
                 let max_fields = 10;
-                let x = data.projectUsers.length;
+                let x = Object.keys(data.projectUsers).length;
 
                 $('#edit-project-add-users').click(function(e) {
                     e.preventDefault();
                     if (x < max_fields) {
                         x++;
-                        $('.edit-inputs-field-wrap').append(append_text);
+                        $('.edit-project-users').append(append_text);
                     } else {
-                        alert('Maximum project users limit was reached');
+                        alert('Maximum amount of project participants: 10. ');
                     }
                 })
 
-                $('.edit-inputs-field-wrap').on("click", ".remove_project-user", function(e) {
+                $('.edit-project-users').on("click", ".remove_project-user", function(e) {
                     e.preventDefault();
-                    $(this).parent('div').remove();
-                    x--;
-
+                    e.preventDefault();
+                    if (1 < x) {
+                        $(this).parent('div').remove();
+                        x--;
+                    } else {
+                        alert('Minimum amount of project participants: 1');
+                    }                    
                 })
             }
         });
     });
 
-
     $(document).on('click', '#update-project', function() {
-        var project_user = new Array();
-        $('.project_user').each(function() {
-            project_user.push($(this).val());
-        });
-
-        project_user = project_user.filter(distinct);
-
         let projectid;
         let project_title;
         let project_description;
         projectid = $('#edit_project_id').val();
         project_title = $('#edit_project_title').val();
         project_description = $('#edit_project_description').val();
+        
+        var project_user_edit = new Array();
+        $('.project_user').each(function() {
+            project_user_edit.push($(this).val());
+        });
+
+        //filter array for only unique values
+        project_user_edit = $.grep(project_user_edit, function(elm, idx){
+        return idx == project_user_edit.indexOf(elm)
+        });
+
         $.ajax({
             type: 'POST',
             url: '/projects/update/' + projectid,
             data: {
                 project_title: project_title,
                 project_description: project_description,
-                project_user: project_user
+                project_user: project_user_edit
             },
             success: function(data) {
                 $(".project" + projectid + " " + ".col-project-title").html(data.projectTitle)
                 $(".project" + projectid + " " + ".col-project-description").html(data.projectDescription)
-                $("#alert").removeClass("d-none");
-                $("#alert").html(data.successMessage);
                 $("#editProjectModal").hide();
                 $('body').removeClass('modal-open');
                 $('.modal-backdrop').remove();
                 $('body').css({
                     overflow: 'auto'
                 });
+                alert(data.successMessage);                           
             }
         });
     })
 
+    // DESTROY AJAX dalis 
+
     $(document).on('click', '.delete-project', function() {
-
         let projectid;
-
         projectid = $(this).attr('data-projectid');
-
 
         $.ajax({
             type: 'POST',
             url: '/projects/destroy/' + projectid,
             success: function(data) {
                 let answer = data.answer
-                if (answer) {
-                    // $("#alert").addClass("alert-success");
+                if (answer) {                    
                     $('.project' + projectid).remove();
                     alert(data.destroyMessage);
                 } else {
-                    // $("#alert").addClass("alert-danger");
                     var dialog = confirm(data.destroyMessage);
                     if (dialog) {
                         $.ajax({
@@ -223,12 +225,8 @@ $(document).ready(function() {
                                 $('.project' + projectid).remove();
                             }
                         })
-                    } else {
-
-                    }
+                    } 
                 }
-                // $("#alert").removeClass("d-none");
-                // $("#alert").html(data.destroyMessage);
             }
         });
     });
