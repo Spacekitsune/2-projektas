@@ -40,11 +40,13 @@ Route::prefix('projects')->group(function () {
     Route::post('update/{project}', 'App\Http\Controllers\ProjectController@update')->name('project.update');
     Route::post('destroy/{project}', 'App\Http\Controllers\ProjectController@destroy')->name('project.destroy');
     Route::post('destroyWithTasks/{project}', 'App\Http\Controllers\ProjectController@destroyWithTasks')->name('project.destroyWithTasks');
+    Route::get('search', 'App\Http\Controllers\ProjectController@search')->name('project.search');
+    Route::get('exportCsv', 'App\Http\Controllers\ProjectController@exportCsv')->name('project.exportCsv');
    
     Route::post('storeTask', 'App\Http\Controllers\TaskController@store')->name('project.storeTask');
     Route::get('showTask/{task}', 'App\Http\Controllers\TaskController@showAjax')->name('project.showTask');
     Route::post('updateTask/{task}', 'App\Http\Controllers\TaskController@update')->name('project.updateTask');
     Route::post('destroyTask/{task}', 'App\Http\Controllers\TaskController@destroy')->name('task.destroyTask');
-    Route::get('search', 'App\Http\Controllers\ProjectController@search')->name('project.search');
+    
 });
 

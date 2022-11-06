@@ -164,9 +164,9 @@ class ProjectController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, Project $project)
-    {   
+    {
         $project->title = $request->project_title;
-        $project->description = $request->project_description;        
+        $project->description = $request->project_description;
         $project->save();
         $project->users()->detach();
 
@@ -176,7 +176,7 @@ class ProjectController extends Controller
                 foreach ($users as $user) {
                     if ($user->email == $project_user) {
                         $project->users()->attach($user->id);
-                    } 
+                    }
                 }
             }
         }
@@ -225,9 +225,9 @@ class ProjectController extends Controller
 
     public function destroyWithTasks(Project $project)
     {
-        $tasks=Task::all();
-        foreach($tasks as $task) {
-            if ($project->id==$task->project_id) {
+        $tasks = Task::all();
+        foreach ($tasks as $task) {
+            if ($project->id == $task->project_id) {
                 $task->delete();
             }
         }
@@ -244,9 +244,9 @@ class ProjectController extends Controller
         $user = Auth::user();
 
         $projects = $user->projects;
-        $total_projects=count($projects);
+        $total_projects = count($projects);
 
-        
+
 
         $pending_projects = 0;
         $completed_projects = 0;
@@ -273,29 +273,50 @@ class ProjectController extends Controller
 
         $collection = collect($projects);
 
-        
 
-        if ($search_key=='done') {
-            $projects = $collection->where('status_id', '=', 3)->all(); 
-        }
 
-        else if ($search_key=='pending') {
-            $projects1 = $collection->where('status_id', '=', 1); 
-            $projects2 = $collection->where('status_id', '=', 2); 
+        if ($search_key == 'done') {
+            $projects = $collection->where('status_id', '=', 3)->all();
+        } else if ($search_key == 'pending') {
+            $projects1 = $collection->where('status_id', '=', 1);
+            $projects2 = $collection->where('status_id', '=', 2);
             $projects = $projects1->concat($projects2)->all();
-        }        
-
-        else {
-            $projects1 = $collection->where('title', 'LIKE', '%'.$search_key.'%'); 
-            $projects2 = $collection->where('description', 'LIKE', '%'.$search_key.'%'); 
+        } else {
+            $projects1 = $collection->where('title', 'LIKE', '%' . $search_key . '%');
+            $projects2 = $collection->where('description', 'LIKE', '%' . $search_key . '%');
             $projects = $projects1->concat($projects2)->all();
         }
-        
-        
-        
+
         return view("project.search", ['projects' => $projects, 'pending_projects' => $pending_projects, 'completed_projects' => $completed_projects, 'total_projects' => $total_projects]);
-   
     }
 
-    
+    public function exportCsv()
+    {
+        $user = Auth::user();
+
+        $projects = $user->projects;
+
+        $projectsCsv = [];
+
+        foreach ($projects as $project) {
+            $array = array(
+                'projectId' => $project->id,
+                'projectTitle' => $project->title,
+                'projectDescription' => $project->description,
+                'projectStatus' => $project->statusProject->title,
+                'projectTasks' => count($project->projectTasks),
+                'projectTasksPening' => $project->projectTasks->where('status_id', 1)->count() + $project->projectTasks->where('status_id', 2)->count()
+            );
+            array_push($projectsCsv, $array);
+        }
+
+        header('Content-Type: text/csv; charset=utf8mb4_unicode_ci');
+        header('Content-Disposition: attachment; filename=projects' . time() . '.csv');
+        $fp = fopen("php://output", "w");
+        fputcsv($fp, array('Project Id', 'Project Title', 'Project Description', 'Project Status', 'Total tasks', 'Tasks pending'));
+        foreach ($projectsCsv as $project) {
+            fputcsv($fp, $project);
+        }
+        fclose($fp);
+    }
 }
