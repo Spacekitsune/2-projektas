@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Task;
 use App\Models\ProjectUser;
+use App\Models\Project;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
 use Illuminate\Http\Request;
@@ -68,6 +69,27 @@ class TaskController extends Controller
             'taskCreated' => date_format($task->created_at,"Y-m-d H:i:s"),            
             'taskUpdated' => date_format($task->updated_at,"Y-m-d H:i:s"),
         );
+
+        $projects = Project::where('id',  $task->project_id)->get();
+
+        $all_tasks = Task::where('project_id',  $task->project_id)->get();
+
+        $todo_tasks=$all_tasks->where('status_id', 1)->count();
+        $in_progress_tasks=$all_tasks->where('status_id', 2)->count();
+        $done_tasks=$all_tasks->where('status_id', 3)->count();
+
+        foreach ($projects as $project) {
+            if (count($all_tasks)==0) {
+                $project->status_id = 1;
+                $project->save();
+            } else if ($todo_tasks!=0 || $in_progress_tasks!=0) {
+                $project->status_id = 2;
+                $project->save();
+            } else if (count($all_tasks)==$done_tasks) {
+                $project->status_id = 3;
+                $project->save();
+            }
+        }
         
         $json_response = response()->json($project_array);
 
@@ -156,6 +178,27 @@ class TaskController extends Controller
 
         $json_response = response()->json($project_array);
 
+        $projects = Project::where('id',  $task->project_id)->get();
+
+        $all_tasks = Task::where('project_id',  $task->project_id)->get();
+
+        $todo_tasks=$all_tasks->where('status_id', 1)->count();
+        $in_progress_tasks=$all_tasks->where('status_id', 2)->count();
+        $done_tasks=$all_tasks->where('status_id', 3)->count();
+
+        foreach ($projects as $project) {
+            if (count($all_tasks)==0) {
+                $project->status_id = 1;
+                $project->save();
+            } else if ($todo_tasks!=0 || $in_progress_tasks!=0) {
+                $project->status_id = 2;
+                $project->save();
+            } else if (count($all_tasks)==$done_tasks) {
+                $project->status_id = 3;
+                $project->save();
+            }
+        }
+
         return $json_response;
     }
 
@@ -172,6 +215,28 @@ class TaskController extends Controller
                 'destroyMessage' => $task->title . " project deleted successfuly"
             );
             $json_response = response()->json($success_array);
+
+            $projects = Project::where('id',  $task->project_id)->get();
+
+            $all_tasks = Task::where('project_id',  $task->project_id)->get();
+    
+            $todo_tasks=$all_tasks->where('status_id', 1)->count();
+            $in_progress_tasks=$all_tasks->where('status_id', 2)->count();
+            $done_tasks=$all_tasks->where('status_id', 3)->count();
+    
+            foreach ($projects as $project) {
+                if (count($all_tasks)==0) {
+                    $project->status_id = 1;
+                    $project->save();
+                } else if ($todo_tasks!=0 || $in_progress_tasks!=0) {
+                    $project->status_id = 2;
+                    $project->save();
+                } else if (count($all_tasks)==$done_tasks) {
+                    $project->status_id = 3;
+                    $project->save();
+                }
+            }
+
             return $json_response;
         }
     
