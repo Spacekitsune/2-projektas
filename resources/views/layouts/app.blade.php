@@ -79,9 +79,9 @@
         </nav>
 
         <main class="py-4">
-            @yield('content')
             @extends('components.project.modal');
             @extends('components.task.modal');
+            @yield('content')            
         </main>
     </div>
 </body>

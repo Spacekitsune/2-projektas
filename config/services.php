@@ -31,14 +31,14 @@ return [
     ],
 
     'facebook' => [
-        'client_id' => '630145361712979', //USE FROM FACEBOOK DEVELOPER ACCOUNT
-        'client_secret' => '1948e7de63739280c04ba5a608b94001', //USE FROM FACEBOOK DEVELOPER ACCOUNT
+        'client_id' => '', //USE FROM FACEBOOK DEVELOPER ACCOUNT
+        'client_secret' => '', //USE FROM FACEBOOK DEVELOPER ACCOUNT
         'redirect' => 'https://127.0.0.1:8000/facebook/callback/'
     ],
 
     'google' => [
-        'client_id' => '170829079985-alk1ksouu129pd8mv5jkca8v2tvvcar0.apps.googleusercontent.com', //USE FROM Google DEVELOPER ACCOUNT
-        'client_secret' => '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', //USE FROM Google DEVELOPER ACCOUNT
+        'client_id' => '', //USE FROM Google DEVELOPER ACCOUNT
+        'client_secret' => '', //USE FROM Google DEVELOPER ACCOUNT
         'redirect' => 'https://127.0.0.1:8000/google/callback/'
     ],
 

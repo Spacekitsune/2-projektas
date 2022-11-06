@@ -77,6 +77,7 @@ class ProjectController extends Controller
      */
     public function store(Request $request)
     {
+        
         //Kuriamas naujas objektas iš Request reikšmių, siuntimui į db
         $user = Auth::user();
         $project = new Project;
@@ -237,8 +238,13 @@ class ProjectController extends Controller
     }
 
 
-    public function search(Request $request)
+    public function search(Request $request)    
     {
+
+        $request->validate([
+            "search_key" => ['required', 'alpha', 'min:1', 'max:255'],            
+        ]);
+
         $search_key = $request->search_key;
 
         $collection = Auth::user()->projects;

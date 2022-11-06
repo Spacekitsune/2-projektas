@@ -9,11 +9,11 @@
                 <div class="ajaxForm">
                     <div class="form-group">
                         <label for="project_title">Project title</label>
-                        <input id="project_title" class="form-control" type="text" name="project_title" placeholder="Enter your project title here..." />
+                        <input id="project_title" class="form-control " type="text" name="project_title" placeholder="Enter your project title here..." />
                     </div>
                     <div class="form-group">
                         <label for="project_description">Project description</label>
-                        <textarea class="form-control" name="project_description" id="project_description" cols="30" rows="5" placeholder="Enter project description here..."></textarea>
+                        <textarea class="form-control " name="project_description" id="project_description" cols="30" rows="5" placeholder="Enter project description here..."></textarea>
                     </div>
                     <div class="inputs-field-wrap">
                         <button id="project-add-users" class="btn btn-primary my-2">

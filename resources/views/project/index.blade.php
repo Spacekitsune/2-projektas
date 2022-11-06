@@ -81,12 +81,17 @@
             <form action="{{route('project.search')}}" method="GET" class="d-inline" style="width: 100%">
                 <!-- @csrf -->
                 <div class="input-group">
-                    <input type="text" class="form-control" name="search_key" placeholder="Search.." aria-describedby="button-addon2">
+                    <input type="text" class="form-control @error('search_key') is-invalid @enderror" name="search_key" placeholder="Search.." aria-describedby="button-addon2">
                     <span class="input-group-btn">
                         <button class="btn btn-primary d-inline" id="button-addon2">
                             <i class="fa fa-search" aria-hidden="true"></i>
                         </button>
                     </span>
+                    @error('search_key')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                    @enderror
                 </div>
             </form>
         </div>
@@ -187,10 +192,15 @@
         let wrapper = $(".inputs-field-wrap");
         let add_button = $("#project-add-users");
         let append_text = `<div class="input-group mb-3 clear-inpput">
-                        <input type="text" class="project_user form-control" placeholder="Enter user email here..." aria-label="Add user" aria-describedby="button-addon2">
+                        <input type="text" class="project_user form-control @error('project_user') is-invalid @enderror" name="project_user" placeholder="Enter user email here..." aria-label="Add user" aria-describedby="button-addon2">
                         <button class="btn btn-outline-danger remove_project-user" type="button" title="Remove">
                             <i class="fa fa-times d-inline-block" aria-hidden="true"></i>
                         </button>
+                        @error('project_user')
+                        <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                        </span>
+                        @enderror
                     </div>`;
 
         let max_fields = 10;
