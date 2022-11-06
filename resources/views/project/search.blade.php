@@ -68,11 +68,7 @@
 
     <div class="container-fluid px-0" style="display: flex; justify-content: space-between">
 
-        <div class="container mt-2 px-0">
-            <button class="btn btn-success me-1" title="Download .csv file">
-                <i class="fa fa-download" aria-hidden="true"></i>
-            </button>
-
+        <div class="container mt-2 px-0">            
             <button type="button" class="btn btn-success " data-bs-toggle="modal" data-bs-target="#createProjectModal">
                 <i class="fa fa-plus" aria-hidden="true"></i>
                 Add project

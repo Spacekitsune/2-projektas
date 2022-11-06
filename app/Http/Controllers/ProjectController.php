@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Project;
 use App\Models\User;
 use App\Models\Task;
+use App\Models\ProjectUser;
 use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
 use Illuminate\Http\Request;
@@ -238,20 +239,14 @@ class ProjectController extends Controller
 
     public function search(Request $request)
     {
-
         $search_key = $request->search_key;
 
-        $user = Auth::user();
-
-        $projects = $user->projects;
-        $total_projects = count($projects);
-
-
-
+        $collection = Auth::user()->projects;
+        $total_projects = count($collection);
         $pending_projects = 0;
         $completed_projects = 0;
 
-        foreach ($projects as $project) {
+        foreach ($collection as $project) {
             $pending_tasks = 0;
             if ($project->status_id != 3) {
                 $pending_projects++;
@@ -269,23 +264,28 @@ class ProjectController extends Controller
                 }
                 $project->pending_tasks = $pending_tasks;
             }
-        }
+        }     
 
-        $collection = collect($projects);
-
-
-
-        if ($search_key == 'done') {
+        
+         if ($search_key == 'done') {
             $projects = $collection->where('status_id', '=', 3)->all();
-        } else if ($search_key == 'pending') {
+            } else if ($search_key == 'pending') {
             $projects1 = $collection->where('status_id', '=', 1);
             $projects2 = $collection->where('status_id', '=', 2);
             $projects = $projects1->concat($projects2)->all();
-        } else {
-            $projects1 = $collection->where('title', 'LIKE', '%' . $search_key . '%');
-            $projects2 = $collection->where('description', 'LIKE', '%' . $search_key . '%');
-            $projects = $projects1->concat($projects2)->all();
-        }
+            } else {
+                $user_id=Auth::user()->id;
+                $users_projects=ProjectUser::where('user_id', $user_id )->get('project_id');     
+                $search_projects = Project::where('title', 'LIKE' , '%'.$search_key.'%')->orWhere('description', 'LIKE', '%'.$search_key.'%')->get();
+                $projects =[];
+                foreach ($search_projects as $project) {
+                    foreach ($users_projects as $user) {                
+                        if ($project->id == $user->project_id) {
+                            array_push($projects, $project);
+                        }
+                    }
+                }  
+            }        
 
         return view("project.search", ['projects' => $projects, 'pending_projects' => $pending_projects, 'completed_projects' => $completed_projects, 'total_projects' => $total_projects]);
     }
