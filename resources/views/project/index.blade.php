@@ -22,7 +22,7 @@
                 <div class="card px-2">
                     <div class="card-body">
                         <div class="container-fluid px-0 my-2" style="display: flex; justify-content: space-between; align-items: center">
-                            <h3 class="m-0 p-0">{{count($projects)}}</h3>
+                            <h3 class="m-0 p-0">{{$total_projects}}</h3>
                             <i class="fa fa-archive fs-4" aria-hidden="true"></i>
                         </div>
                         <h5 class="card-title">Total projects</h5>
@@ -160,7 +160,7 @@
             </td>
         </tr>
     </table>
-
+    {{$projects->onEachSide(1)->links()}}
 </div>
 
 <!-- <script src="{{url('js/project.js')}}"></script> -->

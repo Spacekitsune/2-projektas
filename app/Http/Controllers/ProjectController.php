@@ -10,10 +10,7 @@ use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Monolog\Handler\PushoverHandler;
-use App\Exports\ProjectExport;
-use Excel;
 
 class ProjectController extends Controller
 {
@@ -32,13 +29,15 @@ class ProjectController extends Controller
     {
         $user = Auth::user();
 
-        $projects = $user->projects;
+        $projects = $user->projects->paginate(5);
+
+        $count_projects=$user->projects;
 
         $pending_projects = 0;
         $completed_projects = 0;
+        $total_projects =count($count_projects);
 
-
-        foreach ($projects as $project) {
+        foreach ($count_projects as $project) {
             $pending_tasks = 0;
             if ($project->status_id != 3) {
                 $pending_projects++;
@@ -56,7 +55,7 @@ class ProjectController extends Controller
             }
         }
 
-        return view("project.index", ['projects' => $projects, 'pending_projects' => $pending_projects, 'completed_projects' => $completed_projects]);
+        return view("project.index", ['projects' => $projects,'total_projects' => $total_projects, 'pending_projects' => $pending_projects, 'completed_projects' => $completed_projects]);
     }
 
     /**
@@ -291,7 +290,9 @@ class ProjectController extends Controller
                         }
                     }
                 }  
-            }        
+            }   
+            
+        
 
         return view("project.search", ['projects' => $projects, 'pending_projects' => $pending_projects, 'completed_projects' => $completed_projects, 'total_projects' => $total_projects]);
     }
